@@ -1,0 +1,51 @@
+AXI2APB COVERAGE IMPROVEMENT PACKAGE
+=====================================
+
+This project includes BOTH code-coverage and functional-coverage closure work.
+
+CODE COVERAGE IMPROVEMENTS
+--------------------------
+1. AXI address-sideband fields are configurable in the transaction/sequences.
+2. AXI driver drives LEN/SIZE/BURST/LOCK/CACHE/PROT/REGION/QOS from transactions.
+3. axi2apb_code_coverage_sequence alternates wide address/data patterns and
+   sideband values to increase toggles in axi_aw_buffer, axi_ar_buffer,
+   axi_single_slice and fifo instances.
+4. axi2apb_functional_coverage_sequence adds more extreme/complementary values,
+   long APB wait states and AXI response backpressure, which also exercises
+   additional FIFO/slice control conditions.
+
+FUNCTIONAL COVERAGE IMPROVEMENTS
+--------------------------------
+1. Added axi2apb_functional_coverage_sequence + test.
+2. Covers READ/WRITE in LOW/MID/HIGH address regions.
+3. Covers lower/upper boundaries and data patterns 0, FFFFFFFF, AAAAAAAA,
+   55555555 and OTHER.
+4. Covers LOW/MID/HIGH ID and ZERO/LOW/MID/HIGH USER bins.
+5. Covers FULL/NO/PARTIAL WSTRB.
+6. Covers APB wait-state bins for both READ and WRITE:
+   immediate, 1, short, long and very-long.
+7. Covers BREADY/RREADY backpressure bins: 0, 1, 2-3 and 4+.
+8. Added axi2apb_read_pslverr_sequence + test so READ x PSLVERR is covered;
+   existing PSLVERR test covers WRITE x PSLVERR.
+9. Functional model excludes implementation-unreachable states:
+   - AXI EXOKAY/SLVERR/DECERR (supplied RTL always returns OKAY)
+   - simultaneous WRITE-first arbitration (RTL is READ-priority)
+   - RLAST deasserted (environment verifies legal single-beat LEN=0 transfers)
+
+NEW TESTS
+---------
+axi2apb_code_coverage_test
+axi2apb_functional_coverage_test
+axi2apb_read_pslverr_test
+
+RUN FROM sim/
+-------------
+make clean_all
+make regression
+make all_covg
+make code_covg_gui
+make func_covg_gui
+
+To run the main closure test alone:
+make compile TEST=axi2apb_functional_coverage_test
+make sim TEST=axi2apb_functional_coverage_test
